@@ -5,7 +5,7 @@ mod objects;
 mod utils;
 pub use colour::Colour;
 pub use objects::{Light, LightType, RaySphere};
-use utils::dot_product;
+use utils::dot;
 
 pub struct RayScene {
     pub viewport_width: f64,
@@ -63,7 +63,7 @@ impl RayScene {
                     };
 
                     // Diffuse
-                    let n_dot_l = dot_product(normal, light_direction);
+                    let n_dot_l = dot(normal, light_direction);
                     if n_dot_l > 0.0 {
                         i += light.intensity * n_dot_l
                             / (normal.magnitude() * light_direction.magnitude());
@@ -72,9 +72,9 @@ impl RayScene {
                     // Specular
                     if specular != -1.0 {
                         let reflected_ray =
-                            normal * 2.0 * dot_product(normal, light_direction) - light_direction;
+                            normal * 2.0 * dot(normal, light_direction) - light_direction;
 
-                        let r_dot_v = dot_product(reflected_ray, towards_view);
+                        let r_dot_v = dot(reflected_ray, towards_view);
 
                         if r_dot_v > 0.0 {
                             i += light.intensity
@@ -123,9 +123,9 @@ impl RayScene {
         let r = sphere.radius;
         let co = self.origin - sphere.centre;
 
-        let a = dot_product(view_pos, view_pos);
-        let b = 2.0 * dot_product(co, view_pos);
-        let c = dot_product(co, co) - (r * r);
+        let a = dot(view_pos, view_pos);
+        let b = 2.0 * dot(co, view_pos);
+        let c = dot(co, co) - (r * r);
 
         let discriminant = (b * b) - (4.0 * a * c);
         if discriminant < 0.0 {
