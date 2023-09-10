@@ -43,7 +43,13 @@ impl RayScene {
         )
     }
 
-    pub fn compute_lighting(&self, point: Vec3D, normal: Vec3D) -> f64 {
+    pub fn compute_lighting(
+        &self,
+        point: Vec3D,
+        normal: Vec3D,
+        towards_view: Vec3D,
+        specular: f64,
+    ) -> f64 {
         let mut i = 0.0;
 
         for light in &self.lights {
@@ -56,10 +62,26 @@ impl RayScene {
                         LightType::Directional { direction } => direction,
                     };
 
+                    // Diffuse
                     let n_dot_l = dot_product(normal, light_direction);
                     if n_dot_l > 0.0 {
                         i += light.intensity * n_dot_l
                             / (normal.magnitude() * light_direction.magnitude());
+                    }
+
+                    // Specular
+                    if specular != -1.0 {
+                        let reflected_ray =
+                            normal * 2.0 * dot_product(normal, light_direction) - light_direction;
+
+                        let r_dot_v = dot_product(reflected_ray, towards_view);
+
+                        if r_dot_v > 0.0 {
+                            i += light.intensity
+                                * (r_dot_v
+                                    / (reflected_ray.magnitude() * towards_view.magnitude()))
+                                .powf(specular);
+                        }
                     }
                 }
             }
@@ -91,7 +113,7 @@ impl RayScene {
                 let normal = point - sphere.centre;
                 let normal = normal / normal.magnitude();
 
-                sphere.colour * self.compute_lighting(point, normal)
+                sphere.colour * self.compute_lighting(point, normal, -view_pos, sphere.specular)
             }
             None => Colour::WHITE,
         }

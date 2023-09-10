@@ -18,14 +18,30 @@ fn main() {
         VIEW_DEPTH,
         Vec3D::ZERO,
         vec![
-            RaySphere::new(Vec3D::new(0.0, -1.0, 3.0), 1.0, Colour::new(255, 0, 0)),
-            RaySphere::new(Vec3D::new(2.0, 0.0, 4.0), 1.0, Colour::new(0, 0, 255)),
-            RaySphere::new(Vec3D::new(-2.0, 0.0, 4.0), 1.0, Colour::new(0, 255, 0)),
+            RaySphere::new(
+                Vec3D::new(0.0, -1.0, 3.0),
+                1.0,
+                Colour::new(255, 0, 0),
+                500.0,
+            ), // Red
+            RaySphere::new(
+                Vec3D::new(2.0, 0.0, 4.0),
+                1.0,
+                Colour::new(0, 0, 255),
+                500.0,
+            ), // Blue
+            RaySphere::new(
+                Vec3D::new(-2.0, 0.0, 4.0),
+                1.0,
+                Colour::new(0, 255, 0),
+                10.0,
+            ), // Green
             RaySphere::new(
                 Vec3D::new(0.0, -5001.0, 0.0),
                 5000.0,
                 Colour::new(255, 255, 0),
-            ),
+                1000.0,
+            ), // Yellow
         ],
         vec![
             Light::new_ambient(0.2),
