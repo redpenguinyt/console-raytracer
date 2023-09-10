@@ -25,39 +25,31 @@ impl Colour {
 }
 
 impl Add for Colour {
-	type Output = Self;
-	fn add(self, rhs: Self) -> Self::Output {
-		Self::new(
-			self.r + rhs.r,
-			self.g + rhs.g,
-			self.b + rhs.b,
-		)
-	}
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
+    }
 }
 
 impl AddAssign for Colour {
-	fn add_assign(&mut self, rhs: Self) {
-		self.r += rhs.r;
-		self.g += rhs.g;
-		self.b += rhs.b;
-	}
+    fn add_assign(&mut self, rhs: Self) {
+        self.r += rhs.r;
+        self.g += rhs.g;
+        self.b += rhs.b;
+    }
 }
 
 impl Mul<u8> for Colour {
-	type Output = Colour;
-	fn mul(self, rhs: u8) -> Self::Output {
-		Self::new(
-			self.r * rhs,
-			self.g * rhs,
-			self.b * rhs,
-		)
-	}
+    type Output = Colour;
+    fn mul(self, rhs: u8) -> Self::Output {
+        Self::new(self.r * rhs, self.g * rhs, self.b * rhs)
+    }
 }
 
 impl MulAssign<u8> for Colour {
-	fn mul_assign(&mut self, rhs: u8) {
-		self.r *= rhs;
-		self.g *= rhs;
-		self.b *= rhs;
-	}
+    fn mul_assign(&mut self, rhs: u8) {
+        self.r *= rhs;
+        self.g *= rhs;
+        self.b *= rhs;
+    }
 }
