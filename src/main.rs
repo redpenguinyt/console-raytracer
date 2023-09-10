@@ -3,7 +3,7 @@ use gemini_engine::elements::{
     Vec2D,
 };
 use gemini_engine::elements3d::Vec3D;
-use raytracing::{Colour, RayScene, RaySphere};
+use raytracing::{Colour, Light, RayScene, RaySphere};
 
 const VIEW_WIDTH: f64 = 1.0;
 const VIEW_HEIGHT: f64 = 1.0;
@@ -18,9 +18,19 @@ fn main() {
         VIEW_DEPTH,
         Vec3D::ZERO,
         vec![
-            RaySphere::new(Vec3D::new(0.0, -1.0, 3.0), 1.0, Colour::RED),
-            RaySphere::new(Vec3D::new(2.0, 0.0, 4.0), 1.0, Colour::BLUE),
-            RaySphere::new(Vec3D::new(-2.0, 0.0, 4.0), 1.0, Colour::GREEN),
+            RaySphere::new(Vec3D::new(0.0, -1.0, 3.0), 1.0, Colour::new(255, 0, 0)),
+            RaySphere::new(Vec3D::new(2.0, 0.0, 4.0), 1.0, Colour::new(0, 0, 255)),
+            RaySphere::new(Vec3D::new(-2.0, 0.0, 4.0), 1.0, Colour::new(0, 255, 0)),
+            RaySphere::new(
+                Vec3D::new(0.0, -5001.0, 0.0),
+                5000.0,
+                Colour::new(255, 255, 0),
+            ),
+        ],
+        vec![
+            Light::new_ambient(0.2),
+            Light::new_point(0.6, Vec3D::new(2.0, 1.0, 0.0)),
+            Light::new_directional(0.2, Vec3D::new(1.0, 4.0, 4.0)),
         ],
     );
 

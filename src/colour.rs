@@ -1,6 +1,10 @@
 use gemini_engine::elements::view::Modifier;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
+fn mul_u8_by_f64(value: u8, rhs: f64) -> u8 {
+    (value as f64 * rhs).round() as u8
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Colour {
     pub r: u8,
@@ -11,9 +15,6 @@ pub struct Colour {
 impl Colour {
     pub const BLACK: Self = Self::new(0, 0, 0);
     pub const WHITE: Self = Self::new(255, 255, 255);
-    pub const RED: Self = Self::new(255, 0, 0);
-    pub const GREEN: Self = Self::new(0, 255, 0);
-    pub const BLUE: Self = Self::new(0, 0, 255);
 
     pub const fn new(r: u8, g: u8, b: u8) -> Self {
         Self { r, g, b }
@@ -39,17 +40,21 @@ impl AddAssign for Colour {
     }
 }
 
-impl Mul<u8> for Colour {
+impl Mul<f64> for Colour {
     type Output = Colour;
-    fn mul(self, rhs: u8) -> Self::Output {
-        Self::new(self.r * rhs, self.g * rhs, self.b * rhs)
+    fn mul(self, rhs: f64) -> Self::Output {
+        Self::new(
+            mul_u8_by_f64(self.r, rhs),
+            mul_u8_by_f64(self.g, rhs),
+            mul_u8_by_f64(self.b, rhs),
+        )
     }
 }
 
-impl MulAssign<u8> for Colour {
-    fn mul_assign(&mut self, rhs: u8) {
-        self.r *= rhs;
-        self.g *= rhs;
-        self.b *= rhs;
+impl MulAssign<f64> for Colour {
+    fn mul_assign(&mut self, rhs: f64) {
+        self.r = mul_u8_by_f64(self.r, rhs);
+        self.r = mul_u8_by_f64(self.g, rhs);
+        self.r = mul_u8_by_f64(self.b, rhs);
     }
 }

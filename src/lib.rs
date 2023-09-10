@@ -1,29 +1,11 @@
 use gemini_engine::elements::Vec2D;
 use gemini_engine::elements3d::Vec3D;
 mod colour;
+mod objects;
+mod utils;
 pub use colour::Colour;
-
-fn dot_product(value: Vec3D, other: Vec3D) -> f64 {
-    value.x * other.x + value.y * other.y + value.z * other.z
-}
-
-pub struct RaySphere {
-    pub centre: Vec3D,
-    pub radius: f64,
-    pub colour: Colour,
-}
-
-impl RaySphere {
-    pub const EMPTY: Self = Self::new(Vec3D::ZERO, 0.0, Colour::WHITE);
-
-    pub const fn new(centre: Vec3D, radius: f64, colour: Colour) -> Self {
-        Self {
-            centre,
-            radius,
-            colour,
-        }
-    }
-}
+pub use objects::{Light, LightType, RaySphere};
+use utils::dot_product;
 
 pub struct RayScene {
     pub viewport_width: f64,
@@ -31,6 +13,7 @@ pub struct RayScene {
     pub viewport_depth: f64,
     pub origin: Vec3D,
     pub spheres: Vec<RaySphere>,
+    pub lights: Vec<Light>,
 }
 
 impl RayScene {
@@ -40,6 +23,7 @@ impl RayScene {
         viewport_depth: f64,
         origin: Vec3D,
         spheres: Vec<RaySphere>,
+        lights: Vec<Light>,
     ) -> Self {
         Self {
             viewport_width,
@@ -47,6 +31,7 @@ impl RayScene {
             viewport_depth,
             origin,
             spheres,
+            lights,
         }
     }
 
@@ -56,6 +41,31 @@ impl RayScene {
             pos.y as f64 * self.viewport_height / canvas_size.y as f64,
             self.viewport_depth,
         )
+    }
+
+    pub fn compute_lighting(&self, point: Vec3D, normal: Vec3D) -> f64 {
+        let mut i = 0.0;
+
+        for light in &self.lights {
+            match light.light_type {
+                LightType::Ambient => i += light.intensity,
+                _ => {
+                    let light_direction = match light.light_type {
+                        LightType::Ambient => panic!("Ambience should have already been handled"),
+                        LightType::Point { position } => position - point,
+                        LightType::Directional { direction } => direction,
+                    };
+
+                    let n_dot_l = dot_product(normal, light_direction);
+                    if n_dot_l > 0.0 {
+                        i += light.intensity * n_dot_l
+                            / (normal.magnitude() * light_direction.magnitude());
+                    }
+                }
+            }
+        }
+
+        i
     }
 
     pub fn trace_ray(&self, view_pos: Vec3D, t_min: f64, t_max: f64) -> Colour {
@@ -75,7 +85,16 @@ impl RayScene {
             }
         }
 
-        closest_sphere.unwrap_or(&RaySphere::EMPTY).colour
+        match closest_sphere {
+            Some(sphere) => {
+                let point = self.origin + view_pos * closest_t;
+                let normal = point - sphere.centre;
+                let normal = normal / normal.magnitude();
+
+                sphere.colour * self.compute_lighting(point, normal)
+            }
+            None => Colour::WHITE,
+        }
     }
 
     fn intersect_ray_sphere(&self, view_pos: Vec3D, sphere: &RaySphere) -> (f64, f64) {
