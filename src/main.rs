@@ -10,7 +10,7 @@ const VIEW_HEIGHT: f64 = 1.0;
 const VIEW_DEPTH: f64 = 1.0;
 
 fn main() {
-    let mut canvas = View::new(500, 180, ColChar::BACKGROUND);
+    let mut canvas = View::new(500, 170, ColChar::BACKGROUND);
 
     let scene = RayScene::new(
         VIEW_WIDTH,

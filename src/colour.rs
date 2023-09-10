@@ -20,6 +20,10 @@ impl Colour {
         Self { r, g, b }
     }
 
+    pub const fn greyscale(v: u8) -> Self {
+        Self::new(v, v, v)
+    }
+
     pub fn as_modifier(&self) -> Modifier {
         Modifier::from_rgb(self.r, self.g, self.b)
     }
