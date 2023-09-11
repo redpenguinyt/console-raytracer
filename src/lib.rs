@@ -1,9 +1,8 @@
 use gemini_engine::elements::Vec2D;
 use gemini_engine::elements3d::Vec3D;
-mod colour;
 mod objects;
-pub use colour::Colour;
 pub use objects::{Light, LightType, RaySphere};
+pub use gemini_engine::elements::view::colchar::Colour;
 
 pub struct RayScene {
     pub viewport_width: f64,

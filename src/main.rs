@@ -21,25 +21,25 @@ fn main() {
             RaySphere::new(
                 Vec3D::new(0.0, -1.0, 3.0),
                 1.0,
-                Colour::new(255, 0, 0),
+                Colour::rgb(255, 0, 0),
                 500.0,
             ), // Red
             RaySphere::new(
                 Vec3D::new(2.0, 0.0, 4.0),
                 1.0,
-                Colour::new(0, 0, 255),
+                Colour::rgb(0, 0, 255),
                 500.0,
             ), // Blue
             RaySphere::new(
                 Vec3D::new(-2.0, 0.0, 4.0),
                 1.0,
-                Colour::new(0, 255, 0),
+                Colour::rgb(0, 255, 0),
                 10.0,
             ), // Green
             RaySphere::new(
                 Vec3D::new(0.0, -5001.0, 0.0),
                 5000.0,
-                Colour::new(255, 255, 0),
+                Colour::rgb(255, 255, 0),
                 1000.0,
             ), // Yellow
         ],
@@ -58,10 +58,10 @@ fn main() {
                 scene.canvas_to_viewport(Vec2D { x, y } - canvas.center(), canvas.size());
 
             // 3. Determine the colour seen through that square
-            let colour = scene.trace_ray(view_pos, 1.0, f64::INFINITY).as_modifier();
+            let colour = scene.trace_ray(view_pos, 1.0, f64::INFINITY);
 
             // 4. Paint the pixel with that clour
-            let fill_char = ColChar::SOLID.with_mod(colour);
+            let fill_char = ColChar::SOLID.with_colour(colour);
             canvas.plot(canvas_point, fill_char, Wrapping::Panic);
         }
     }
