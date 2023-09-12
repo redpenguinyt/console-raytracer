@@ -50,6 +50,28 @@ fn main() {
         ],
     );
 
-    canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
-    canvas.display_render().unwrap();
+    let mut rendered_frames = vec![];
+
+    for i in 0..40 {
+        print!("rendering frame {i}\r");
+        scene.spheres[2].centre.x += 0.05;
+
+        canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
+        rendered_frames.push(canvas.clone());
+    }
+    println!();
+
+    let mut i = 0;
+    let mut direction = 1isize;
+    fps_gameloop!({
+        i += direction;
+        if i < 1 {
+            direction = 1;
+        }
+        if i > rendered_frames.len() as isize - 2 {
+            direction = -1;
+        }
+    }, {
+        rendered_frames[i as usize].display_render().unwrap();
+    }, 60);
 }
