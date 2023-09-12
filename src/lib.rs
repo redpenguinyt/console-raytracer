@@ -10,6 +10,7 @@ pub struct RayScene {
     pub viewport_width: f64,
     pub viewport_height: f64,
     pub viewport_depth: f64,
+    pub reflection_depth: u64,
     pub spheres: Vec<RaySphere>,
     pub lights: Vec<Light>,
 }
@@ -26,6 +27,7 @@ impl RayScene {
             viewport_width,
             viewport_height,
             viewport_depth,
+            reflection_depth: 5,
             spheres,
             lights,
         }
@@ -49,7 +51,13 @@ impl RayScene {
                     self.canvas_to_viewport(Vec2D { x, y } - canvas_size / 2, canvas_size);
 
                 // 3. Determine the colour seen through that square
-                let colour = self.trace_ray(view_pos, 1.0, f64::INFINITY);
+                let colour = self.trace_ray(
+                    Vec3D::ZERO,
+                    view_pos,
+                    1.0,
+                    f64::INFINITY,
+                    self.reflection_depth,
+                );
 
                 // 4. Paint the pixel with that clour
                 let fill_char = ColChar::SOLID.with_colour(colour);
@@ -60,20 +68,44 @@ impl RayScene {
         container
     }
 
-    pub fn trace_ray(&self, direction: Vec3D, t_min: f64, t_max: f64) -> Colour {
+    pub fn trace_ray(
+        &self,
+        origin: Vec3D,
+        direction: Vec3D,
+        t_min: f64,
+        t_max: f64,
+        reflection_depth: u64,
+    ) -> Colour {
         let (closest_sphere, closest_t) =
-            ray::closest_intersection(&self.spheres, Vec3D::ZERO, direction, t_min, t_max);
+            ray::closest_intersection(&self.spheres, origin, direction, t_min, t_max);
 
-        match closest_sphere {
-            Some(sphere) => {
-                let point = Vec3D::ZERO + direction * closest_t;
-                let normal = point - sphere.centre;
-                let normal = normal / normal.magnitude();
+        let closest_sphere = match closest_sphere {
+            Some(sphere) => sphere,
+            None => return Colour::BLACK,
+        };
 
-                sphere.colour * self.compute_lighting(point, normal, -direction, sphere.specular)
-            }
-            None => Colour::WHITE,
+        // Comput colour
+        let point = origin + direction * closest_t;
+        let normal = point - closest_sphere.centre;
+        let normal = normal / normal.magnitude();
+
+        let local_colour = closest_sphere.colour
+            * self.compute_lighting(point, normal, -direction, closest_sphere.specular);
+
+        if reflection_depth <= 0 || closest_sphere.reflective <= 0.0 {
+            return local_colour;
         }
+
+        let reflected_colour = self.trace_ray(
+            point,
+            ray::reflect_ray(-direction, normal),
+            0.001,
+            f64::INFINITY,
+            reflection_depth - 1,
+        );
+
+        local_colour * (1.0 - closest_sphere.reflective)
+            + reflected_colour * closest_sphere.reflective
     }
 
     pub fn compute_lighting(
@@ -116,8 +148,7 @@ impl RayScene {
 
                     // Specular
                     if specular != -1.0 {
-                        let reflected_ray =
-                            normal * 2.0 * normal.dot(light_direction) - light_direction;
+                        let reflected_ray = ray::reflect_ray(light_direction, normal);
 
                         let r_dot_v = reflected_ray.dot(towards_view);
 

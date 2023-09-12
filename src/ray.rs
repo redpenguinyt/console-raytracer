@@ -1,6 +1,10 @@
 use super::objects::RaySphere;
 use gemini_engine::elements3d::Vec3D;
 
+pub fn reflect_ray(ray: Vec3D, normal: Vec3D) -> Vec3D {
+    normal * 2.0 * normal.dot(ray) - ray
+}
+
 pub fn intersect_ray_sphere(origin: Vec3D, direction: Vec3D, sphere: &RaySphere) -> (f64, f64) {
     let r = sphere.radius;
     let co = origin - sphere.centre;

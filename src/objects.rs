@@ -6,15 +6,23 @@ pub struct RaySphere {
     pub radius: f64,
     pub colour: Colour,
     pub specular: f64,
+    pub reflective: f64,
 }
 
 impl RaySphere {
-    pub const fn new(centre: Vec3D, radius: f64, colour: Colour, specular: f64) -> Self {
+    pub const fn new(
+        centre: Vec3D,
+        radius: f64,
+        colour: Colour,
+        specular: f64,
+        reflective: f64,
+    ) -> Self {
         Self {
             centre,
             radius,
             colour,
             specular,
+            reflective,
         }
     }
 }

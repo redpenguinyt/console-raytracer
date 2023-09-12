@@ -19,24 +19,28 @@ fn main() {
                 1.0,
                 Colour::rgb(255, 0, 0),
                 500.0,
+                0.2,
             ), // Red
             RaySphere::new(
                 Vec3D::new(2.0, 0.0, 4.0),
                 1.0,
                 Colour::rgb(0, 0, 255),
                 500.0,
+                0.3,
             ), // Blue
             RaySphere::new(
                 Vec3D::new(-2.0, 0.0, 4.0),
                 1.0,
                 Colour::rgb(0, 255, 0),
                 10.0,
+                0.4,
             ), // Green
             RaySphere::new(
                 Vec3D::new(0.0, -5001.0, 0.0),
                 5000.0,
                 Colour::rgb(255, 255, 0),
                 1000.0,
+                0.5,
             ), // Yellow
         ],
         vec![
@@ -47,6 +51,5 @@ fn main() {
     );
 
     canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
-
     canvas.display_render().unwrap();
 }
