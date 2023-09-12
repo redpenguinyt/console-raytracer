@@ -1,7 +1,4 @@
-use gemini_engine::elements::{
-    view::{ColChar, View, Wrapping},
-    Vec2D,
-};
+use gemini_engine::elements::view::{ColChar, View, Wrapping};
 use gemini_engine::elements3d::Vec3D;
 use raytracing::{Colour, Light, RayScene, RaySphere};
 
@@ -50,21 +47,7 @@ fn main() {
         ],
     );
 
-    for x in 0..canvas.width as isize {
-        for y in 0..canvas.height as isize {
-            let canvas_point = Vec2D::new(x, canvas.height as isize - y - 1);
-            // 2. Determine which square on the viewport corresponds to this pixel
-            let view_pos =
-                scene.canvas_to_viewport(Vec2D { x, y } - canvas.center(), canvas.size());
-
-            // 3. Determine the colour seen through that square
-            let colour = scene.trace_ray(view_pos, 1.0, f64::INFINITY);
-
-            // 4. Paint the pixel with that clour
-            let fill_char = ColChar::SOLID.with_colour(colour);
-            canvas.plot(canvas_point, fill_char, Wrapping::Panic);
-        }
-    }
+    canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
 
     canvas.display_render().unwrap();
 }

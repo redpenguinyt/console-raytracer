@@ -1,8 +1,10 @@
-use gemini_engine::elements::Vec2D;
+use gemini_engine::elements::PixelContainer;
+use gemini_engine::elements::{Vec2D, view::ColChar};
 use gemini_engine::elements3d::Vec3D;
 mod objects;
 pub use gemini_engine::elements::view::colchar::Colour;
 pub use objects::{Light, LightType, RaySphere};
+mod ray;
 
 pub struct RayScene {
     pub viewport_width: f64,
@@ -38,6 +40,62 @@ impl RayScene {
             pos.y as f64 * self.viewport_height / canvas_size.y as f64,
             self.viewport_depth,
         )
+    }
+
+    pub fn render(&self, canvas_size: Vec2D) -> PixelContainer {
+        let mut container = PixelContainer::new();
+        for x in 0..canvas_size.x as isize {
+            for y in 0..canvas_size.y as isize {
+                let canvas_point = Vec2D::new(x, canvas_size.y as isize - y - 1);
+                // 2. Determine which square on the viewport corresponds to this pixel
+                let view_pos =
+                    self.canvas_to_viewport(Vec2D { x, y } - canvas_size / 2, canvas_size);
+
+                // 3. Determine the colour seen through that square
+                let colour = self.trace_ray(view_pos, 1.0, f64::INFINITY);
+
+                // 4. Paint the pixel with that clour
+                let fill_char = ColChar::SOLID.with_colour(colour);
+                container.plot(canvas_point, fill_char);
+            }
+        }
+
+        container
+    }
+
+    pub fn trace_ray(&self, direction: Vec3D, t_min: f64, t_max: f64) -> Colour {
+        let (closest_sphere, closest_t) = self.closest_intersection(self.origin, direction, t_min, t_max);
+
+        match closest_sphere {
+            Some(sphere) => {
+                let point = self.origin + direction * closest_t;
+                let normal = point - sphere.centre;
+                let normal = normal / normal.magnitude();
+
+                sphere.colour * self.compute_lighting(point, normal, -direction, sphere.specular)
+            }
+            None => Colour::WHITE,
+        }
+    }
+
+    fn closest_intersection(&self, origin: Vec3D, direction: Vec3D, t_min: f64, t_max: f64) -> (Option<&RaySphere>, f64) {
+        let mut closest_t = f64::INFINITY;
+        let mut closest_sphere = None;
+
+        for sphere in &self.spheres {
+            let (t1, t2) = ray::intersect_ray_sphere(origin, direction, sphere);
+
+            if (t_min..t_max).contains(&t1) && t1 < closest_t {
+                closest_t = t1;
+                closest_sphere = Some(sphere);
+            }
+            if (t_min..t_max).contains(&t2) && t2 < closest_t {
+                closest_t = t2;
+                closest_sphere = Some(sphere);
+            }
+        }
+
+        (closest_sphere, closest_t)
     }
 
     pub fn compute_lighting(
@@ -85,52 +143,5 @@ impl RayScene {
         }
 
         i
-    }
-
-    pub fn trace_ray(&self, view_pos: Vec3D, t_min: f64, t_max: f64) -> Colour {
-        let mut closest_t = f64::INFINITY;
-        let mut closest_sphere = None;
-
-        for sphere in &self.spheres {
-            let (t1, t2) = self.intersect_ray_sphere(view_pos, sphere);
-
-            if (t_min..t_max).contains(&t1) && t1 < closest_t {
-                closest_t = t1;
-                closest_sphere = Some(sphere);
-            }
-            if (t_min..t_max).contains(&t2) && t2 < closest_t {
-                closest_t = t2;
-                closest_sphere = Some(sphere);
-            }
-        }
-
-        match closest_sphere {
-            Some(sphere) => {
-                let point = self.origin + view_pos * closest_t;
-                let normal = point - sphere.centre;
-                let normal = normal / normal.magnitude();
-
-                sphere.colour * self.compute_lighting(point, normal, -view_pos, sphere.specular)
-            }
-            None => Colour::WHITE,
-        }
-    }
-
-    fn intersect_ray_sphere(&self, view_pos: Vec3D, sphere: &RaySphere) -> (f64, f64) {
-        let r = sphere.radius;
-        let co = self.origin - sphere.centre;
-
-        let a = view_pos.dot(view_pos);
-        let b = 2.0 * co.dot(view_pos);
-        let c = co.dot(co) - (r * r);
-
-        let discriminant = (b * b) - (4.0 * a * c);
-        if discriminant < 0.0 {
-            return (f64::INFINITY, f64::INFINITY);
-        }
-
-        let t1 = (-b + discriminant.sqrt()) / (2.0 * a);
-        let t2 = (-b - discriminant.sqrt()) / (2.0 * a);
-        (t1, t2)
     }
 }
