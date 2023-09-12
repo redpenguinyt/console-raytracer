@@ -1,5 +1,5 @@
 use gemini_engine::elements::PixelContainer;
-use gemini_engine::elements::{Vec2D, view::ColChar};
+use gemini_engine::elements::{view::ColChar, Vec2D};
 use gemini_engine::elements3d::Vec3D;
 mod objects;
 pub use gemini_engine::elements::view::colchar::Colour;
@@ -10,7 +10,6 @@ pub struct RayScene {
     pub viewport_width: f64,
     pub viewport_height: f64,
     pub viewport_depth: f64,
-    pub origin: Vec3D,
     pub spheres: Vec<RaySphere>,
     pub lights: Vec<Light>,
 }
@@ -20,7 +19,6 @@ impl RayScene {
         viewport_width: f64,
         viewport_height: f64,
         viewport_depth: f64,
-        origin: Vec3D,
         spheres: Vec<RaySphere>,
         lights: Vec<Light>,
     ) -> Self {
@@ -28,7 +26,6 @@ impl RayScene {
             viewport_width,
             viewport_height,
             viewport_depth,
-            origin,
             spheres,
             lights,
         }
@@ -64,11 +61,12 @@ impl RayScene {
     }
 
     pub fn trace_ray(&self, direction: Vec3D, t_min: f64, t_max: f64) -> Colour {
-        let (closest_sphere, closest_t) = self.closest_intersection(self.origin, direction, t_min, t_max);
+        let (closest_sphere, closest_t) =
+            ray::closest_intersection(&self.spheres, Vec3D::ZERO, direction, t_min, t_max);
 
         match closest_sphere {
             Some(sphere) => {
-                let point = self.origin + direction * closest_t;
+                let point = Vec3D::ZERO + direction * closest_t;
                 let normal = point - sphere.centre;
                 let normal = normal / normal.magnitude();
 
@@ -76,26 +74,6 @@ impl RayScene {
             }
             None => Colour::WHITE,
         }
-    }
-
-    fn closest_intersection(&self, origin: Vec3D, direction: Vec3D, t_min: f64, t_max: f64) -> (Option<&RaySphere>, f64) {
-        let mut closest_t = f64::INFINITY;
-        let mut closest_sphere = None;
-
-        for sphere in &self.spheres {
-            let (t1, t2) = ray::intersect_ray_sphere(origin, direction, sphere);
-
-            if (t_min..t_max).contains(&t1) && t1 < closest_t {
-                closest_t = t1;
-                closest_sphere = Some(sphere);
-            }
-            if (t_min..t_max).contains(&t2) && t2 < closest_t {
-                closest_t = t2;
-                closest_sphere = Some(sphere);
-            }
-        }
-
-        (closest_sphere, closest_t)
     }
 
     pub fn compute_lighting(

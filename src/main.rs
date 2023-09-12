@@ -13,7 +13,6 @@ fn main() {
         VIEW_WIDTH,
         VIEW_HEIGHT,
         VIEW_DEPTH,
-        Vec3D::ZERO,
         vec![
             RaySphere::new(
                 Vec3D::new(0.0, -1.0, 3.0),
