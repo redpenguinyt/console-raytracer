@@ -1,6 +1,6 @@
 use gemini_engine::elements::PixelContainer;
 use gemini_engine::elements::{view::ColChar, Vec2D};
-use gemini_engine::elements3d::{Vec3D, Transform3D};
+use gemini_engine::elements3d::{Transform3D, Vec3D};
 mod objects;
 pub use gemini_engine::elements::view::colchar::Colour;
 pub use objects::{Light, LightType, RaySphere};
@@ -47,7 +47,9 @@ impl RayScene {
             for y in 0..canvas_size.y as isize {
                 let canvas_point = Vec2D::new(x, canvas_size.y as isize - y - 1);
                 // 2. Determine which square on the viewport corresponds to this pixel
-                let view_pos = self.camera_transform.rotation * self.canvas_to_viewport(Vec2D { x, y } - canvas_size / 2, canvas_size);
+                let view_pos = self
+                    .camera_transform
+                    .rotate(self.canvas_to_viewport(Vec2D { x, y } - canvas_size / 2, canvas_size));
 
                 // 3. Determine the colour seen through that square
                 let colour = self.trace_ray(

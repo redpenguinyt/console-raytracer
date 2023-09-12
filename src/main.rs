@@ -1,6 +1,7 @@
+use std::time::Instant;
+
 use gemini_engine::elements::view::{ColChar, View, Wrapping};
-use gemini_engine::elements3d::{Vec3D, Transform3D};
-use gemini_engine::fps_gameloop;
+use gemini_engine::elements3d::{Transform3D, Vec3D};
 use raytracing::{Colour, Light, RayScene, RaySphere};
 
 const VIEW_SIZE: (f64, f64) = (1.0, 1.0);
@@ -9,10 +10,10 @@ const VIEW_DEPTH: f64 = 1.0;
 fn main() {
     let mut canvas = View::new(500, 170, ColChar::BACKGROUND);
 
-    let mut scene = RayScene::new(
+    let scene = RayScene::new(
         VIEW_SIZE,
         VIEW_DEPTH,
-        Transform3D::DEFAULT,
+        Transform3D::new_tr(Vec3D::new(3.0, 0.0, 0.0), Vec3D::new(0.0, 0.7, 0.0)),
         vec![
             RaySphere::new(
                 Vec3D::new(0.0, -1.0, 3.0),
@@ -40,7 +41,7 @@ fn main() {
                 5000.0,
                 Colour::rgb(255, 255, 0),
                 1000.0,
-                0.5,
+                0.1,
             ), // Yellow
         ],
         vec![
@@ -50,28 +51,9 @@ fn main() {
         ],
     );
 
-    let mut rendered_frames = vec![];
-
-    for i in 0..40 {
-        print!("rendering frame {i}\r");
-        scene.spheres[2].centre.x += 0.05;
-
-        canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
-        rendered_frames.push(canvas.clone());
-    }
-    println!();
-
-    let mut i = 0;
-    let mut direction = 1isize;
-    fps_gameloop!({
-        i += direction;
-        if i < 1 {
-            direction = 1;
-        }
-        if i > rendered_frames.len() as isize - 2 {
-            direction = -1;
-        }
-    }, {
-        rendered_frames[i as usize].display_render().unwrap();
-    }, 60);
+    let now = Instant::now();
+    canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
+    canvas.display_render().unwrap();
+    let elapsed = now.elapsed();
+    println!("Elapsed: {}µs", elapsed.as_micros());
 }
