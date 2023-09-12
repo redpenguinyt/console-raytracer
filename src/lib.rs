@@ -89,11 +89,23 @@ impl RayScene {
             match light.light_type {
                 LightType::Ambient => i += light.intensity,
                 _ => {
-                    let light_direction = match light.light_type {
+                    let (light_direction, t_max) = match light.light_type {
                         LightType::Ambient => panic!("Ambience should have already been handled"),
-                        LightType::Point { position } => position - point,
-                        LightType::Directional { direction } => direction,
+                        LightType::Point { position } => (position - point, 1.0),
+                        LightType::Directional { direction } => (direction, f64::INFINITY),
                     };
+
+                    // Shadow check
+                    let (shadow_sphere, _shadow_t) = ray::closest_intersection(
+                        &self.spheres,
+                        point,
+                        light_direction,
+                        0.001,
+                        t_max,
+                    );
+                    if shadow_sphere.is_some() {
+                        continue;
+                    }
 
                     // Diffuse
                     let n_dot_l = normal.dot(light_direction);
