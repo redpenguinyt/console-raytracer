@@ -1,15 +1,15 @@
 use gemini_engine::elements::PixelContainer;
 use gemini_engine::elements::{view::ColChar, Vec2D};
-use gemini_engine::elements3d::Vec3D;
+use gemini_engine::elements3d::{Vec3D, Transform3D};
 mod objects;
 pub use gemini_engine::elements::view::colchar::Colour;
 pub use objects::{Light, LightType, RaySphere};
 mod ray;
 
 pub struct RayScene {
-    pub viewport_width: f64,
-    pub viewport_height: f64,
+    pub viewport_size: (f64, f64),
     pub viewport_depth: f64,
+    pub camera_transform: Transform3D,
     pub reflection_depth: u64,
     pub spheres: Vec<RaySphere>,
     pub lights: Vec<Light>,
@@ -17,16 +17,16 @@ pub struct RayScene {
 
 impl RayScene {
     pub const fn new(
-        viewport_width: f64,
-        viewport_height: f64,
+        viewport_size: (f64, f64),
         viewport_depth: f64,
+        camera_transform: Transform3D,
         spheres: Vec<RaySphere>,
         lights: Vec<Light>,
     ) -> Self {
         Self {
-            viewport_width,
-            viewport_height,
+            viewport_size,
             viewport_depth,
+            camera_transform,
             reflection_depth: 5,
             spheres,
             lights,
@@ -35,8 +35,8 @@ impl RayScene {
 
     pub fn canvas_to_viewport(&self, pos: Vec2D, canvas_size: Vec2D) -> Vec3D {
         Vec3D::new(
-            pos.x as f64 * self.viewport_width / canvas_size.x as f64,
-            pos.y as f64 * self.viewport_height / canvas_size.y as f64,
+            pos.x as f64 * self.viewport_size.0 / canvas_size.x as f64,
+            pos.y as f64 * self.viewport_size.1 / canvas_size.y as f64,
             self.viewport_depth,
         )
     }
@@ -47,12 +47,11 @@ impl RayScene {
             for y in 0..canvas_size.y as isize {
                 let canvas_point = Vec2D::new(x, canvas_size.y as isize - y - 1);
                 // 2. Determine which square on the viewport corresponds to this pixel
-                let view_pos =
-                    self.canvas_to_viewport(Vec2D { x, y } - canvas_size / 2, canvas_size);
+                let view_pos = self.camera_transform.rotation * self.canvas_to_viewport(Vec2D { x, y } - canvas_size / 2, canvas_size);
 
                 // 3. Determine the colour seen through that square
                 let colour = self.trace_ray(
-                    Vec3D::ZERO,
+                    self.camera_transform.translation,
                     view_pos,
                     1.0,
                     f64::INFINITY,

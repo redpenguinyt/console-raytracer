@@ -1,18 +1,18 @@
 use gemini_engine::elements::view::{ColChar, View, Wrapping};
-use gemini_engine::elements3d::Vec3D;
+use gemini_engine::elements3d::{Vec3D, Transform3D};
+use gemini_engine::fps_gameloop;
 use raytracing::{Colour, Light, RayScene, RaySphere};
 
-const VIEW_WIDTH: f64 = 1.0;
-const VIEW_HEIGHT: f64 = 1.0;
+const VIEW_SIZE: (f64, f64) = (1.0, 1.0);
 const VIEW_DEPTH: f64 = 1.0;
 
 fn main() {
     let mut canvas = View::new(500, 170, ColChar::BACKGROUND);
 
-    let scene = RayScene::new(
-        VIEW_WIDTH,
-        VIEW_HEIGHT,
+    let mut scene = RayScene::new(
+        VIEW_SIZE,
         VIEW_DEPTH,
+        Transform3D::DEFAULT,
         vec![
             RaySphere::new(
                 Vec3D::new(0.0, -1.0, 3.0),
@@ -29,7 +29,7 @@ fn main() {
                 0.3,
             ), // Blue
             RaySphere::new(
-                Vec3D::new(-2.0, 0.0, 4.0),
+                Vec3D::new(-2.0, 0.2, 4.2),
                 1.0,
                 Colour::rgb(0, 255, 0),
                 10.0,
