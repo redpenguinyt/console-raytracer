@@ -7,4 +7,4 @@ This is a raytracer written in Rust for displaying raytraced images in the termi
 This project can also be added as a cargo package with `cargo add --git https://github.com/`, if you wanna put together your own scene.
 
 The result looks like this:
-[!The render result](https://cdn.discordapp.com/attachments/887416381933486110/1151517584110387291/image.png)
+![The render result](https://cdn.discordapp.com/attachments/887416381933486110/1151517584110387291/image.png)
