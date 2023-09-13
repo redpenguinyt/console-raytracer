@@ -1,7 +1,6 @@
-use std::time::Instant;
-
 use gemini_engine::elements::view::{ColChar, Colour, View, Wrapping};
 use gemini_engine::elements3d::{Transform3D, Vec3D};
+use gemini_engine::fps_gameloop;
 use raytracing::{Light, RayScene, RaySphere};
 
 const VIEW_SIZE: (f64, f64) = (1.0, 1.0);
@@ -10,10 +9,10 @@ const VIEW_DEPTH: f64 = 1.0;
 fn main() {
     let mut canvas = View::new(500, 170, ColChar::BACKGROUND);
 
-    let scene = RayScene::new(
+    let mut scene = RayScene::new(
         VIEW_SIZE,
         VIEW_DEPTH,
-        Transform3D::DEFAULT,
+        Transform3D::new_tr(Vec3D::ZERO, Vec3D::new(-0.2, 0.0, 0.0)),
         // Transform3D::new_tr(Vec3D::new(3.0, 0.0, 0.0), Vec3D::new(0.0, 0.7, 0.0)),
         vec![
             RaySphere::new(
@@ -44,6 +43,7 @@ fn main() {
                 1000.0,
                 0.1,
             ), // Yellow
+            RaySphere::new(Vec3D::new(0.0, 3.0, 5.0), 2.0, Colour::WHITE, 10.0, 0.7),
         ],
         vec![
             Light::new_ambient(0.2),
@@ -52,9 +52,17 @@ fn main() {
         ],
     );
 
-    let now = Instant::now();
-    canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
-    let elapsed = now.elapsed();
-    canvas.display_render().unwrap();
-    println!("Elapsed: {}µs", elapsed.as_micros());
+    fps_gameloop!(
+        {
+            scene.spheres[1].centre = Transform3D::new_tr(Vec3D::ZERO, Vec3D::new(0.0, 0.02, 0.0))
+                .rotate(scene.spheres[1].centre);
+        },
+        {
+            canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
+            canvas.display_render().unwrap();
+            break;
+        },
+        30,
+        |elapsed, _| println!("Elapsed: {:.2?}µs", elapsed)
+    );
 }

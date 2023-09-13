@@ -33,7 +33,7 @@ impl RayScene {
             viewport_size,
             viewport_depth,
             camera_transform,
-            reflection_depth: 2,
+            reflection_depth: 3,
             spheres,
             lights,
         }
