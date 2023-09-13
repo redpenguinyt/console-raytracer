@@ -1,6 +1,5 @@
 use gemini_engine::elements::view::{ColChar, Colour, View, Wrapping};
 use gemini_engine::elements3d::{Transform3D, Vec3D};
-use gemini_engine::fps_gameloop;
 use raytracing::{Light, RayScene, RaySphere};
 
 const VIEW_SIZE: (f64, f64) = (1.0, 1.0);
@@ -9,7 +8,7 @@ const VIEW_DEPTH: f64 = 1.0;
 fn main() {
     let mut canvas = View::new(500, 170, ColChar::BACKGROUND);
 
-    let mut scene = RayScene::new(
+    let scene = RayScene::new(
         VIEW_SIZE,
         VIEW_DEPTH,
         Transform3D::new_tr(Vec3D::ZERO, Vec3D::new(-0.2, 0.0, 0.0)),
@@ -52,17 +51,6 @@ fn main() {
         ],
     );
 
-    fps_gameloop!(
-        {
-            scene.spheres[1].centre = Transform3D::new_tr(Vec3D::ZERO, Vec3D::new(0.0, 0.02, 0.0))
-                .rotate(scene.spheres[1].centre);
-        },
-        {
-            canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
-            canvas.display_render().unwrap();
-            break;
-        },
-        30,
-        |elapsed, _| println!("Elapsed: {:.2?}µs", elapsed)
-    );
+    canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
+    canvas.display_render().unwrap();
 }
