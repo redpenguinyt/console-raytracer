@@ -8,3 +8,5 @@ This project can also be added as a cargo package with `cargo add --git https://
 
 The result looks like this:
 ![The render result](https://cdn.discordapp.com/attachments/887416381933486110/1151517584110387291/image.png)
+
+Yup, every single one of those pixels is a text character. The final result takes only ~30 milliseconds to render
