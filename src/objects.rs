@@ -1,6 +1,7 @@
 use super::Colour;
 use gemini_engine::elements3d::Vec3D;
 
+#[derive(Debug, Clone, Copy)]
 pub struct RaySphere {
     pub centre: Vec3D,
     pub radius: f64,
@@ -27,12 +28,14 @@ impl RaySphere {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum LightType {
     Ambient,
     Point { position: Vec3D },
     Directional { direction: Vec3D },
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Light {
     pub light_type: LightType,
     pub intensity: f64,

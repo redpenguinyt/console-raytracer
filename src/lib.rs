@@ -6,6 +6,7 @@ pub use gemini_engine::elements::view::colchar::Colour;
 pub use objects::{Light, LightType, RaySphere};
 mod ray;
 
+#[derive(Debug, Clone)]
 pub struct RayScene {
     pub viewport_size: (f64, f64),
     pub viewport_depth: f64,
