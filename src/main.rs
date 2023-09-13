@@ -13,7 +13,8 @@ fn main() {
     let scene = RayScene::new(
         VIEW_SIZE,
         VIEW_DEPTH,
-        Transform3D::new_tr(Vec3D::new(3.0, 0.0, 0.0), Vec3D::new(0.0, 0.7, 0.0)),
+        Transform3D::DEFAULT,
+        // Transform3D::new_tr(Vec3D::new(3.0, 0.0, 0.0), Vec3D::new(0.0, 0.7, 0.0)),
         vec![
             RaySphere::new(
                 Vec3D::new(0.0, -1.0, 3.0),
@@ -30,7 +31,7 @@ fn main() {
                 0.3,
             ), // Blue
             RaySphere::new(
-                Vec3D::new(-2.0, 0.2, 4.2),
+                Vec3D::new(-2.0, 0.0, 4.0),
                 1.0,
                 Colour::rgb(0, 255, 0),
                 10.0,
@@ -53,7 +54,7 @@ fn main() {
 
     let now = Instant::now();
     canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
-    canvas.display_render().unwrap();
     let elapsed = now.elapsed();
+    canvas.display_render().unwrap();
     println!("Elapsed: {}µs", elapsed.as_micros());
 }
