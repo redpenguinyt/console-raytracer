@@ -16,10 +16,10 @@ fn main() {
         vec![
             RaySphere::new(
                 Vec3D::new(0.0, -1.0, 3.0), // Position
-                1.0, // Radius
-                Colour::rgb(255, 0, 0), // Colour (red)
-                500.0, // Specular (in this case, quite shiny)
-                0.2, // Reflectiveness (a value from 0 to 1)
+                1.0,                        // Radius
+                Colour::rgb(255, 0, 0),     // Colour (red)
+                500.0,                      // Specular (in this case, quite shiny)
+                0.2,                        // Reflectiveness (a value from 0 to 1)
             ),
             RaySphere::new(
                 Vec3D::new(2.0, 0.0, 4.0),
@@ -32,14 +32,14 @@ fn main() {
                 Vec3D::new(-2.0, 0.0, 4.0),
                 1.0,
                 Colour::rgb(0, 255, 0), // Green
-                10.0, // somewhat shiny
+                10.0,                   // somewhat shiny
                 0.4,
             ),
             RaySphere::new(
                 Vec3D::new(0.0, -5001.0, 0.0),
                 5000.0,
                 Colour::rgb(255, 255, 0), // Yellow
-                1000.0, // very shiny
+                1000.0,                   // very shiny
                 0.1,
             ),
             RaySphere::new(Vec3D::new(0.0, 3.0, 5.0), 2.0, Colour::WHITE, 2.0, 0.7),
