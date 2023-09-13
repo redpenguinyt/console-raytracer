@@ -1,8 +1,8 @@
 use std::time::Instant;
 
-use gemini_engine::elements::view::{ColChar, View, Wrapping};
+use gemini_engine::elements::view::{ColChar, Colour, View, Wrapping};
 use gemini_engine::elements3d::{Transform3D, Vec3D};
-use raytracing::{Colour, Light, RayScene, RaySphere};
+use raytracing::{Light, RayScene, RaySphere};
 
 const VIEW_SIZE: (f64, f64) = (1.0, 1.0);
 const VIEW_DEPTH: f64 = 1.0;

@@ -1,11 +1,13 @@
 use std::sync::mpsc;
 use std::thread;
 
-use gemini_engine::elements::{view::ColChar, Vec2D};
+use gemini_engine::elements::{
+    view::{ColChar, Colour},
+    Vec2D,
+};
 use gemini_engine::elements::{PixelContainer, Point};
 use gemini_engine::elements3d::{Transform3D, Vec3D};
 mod objects;
-pub use gemini_engine::elements::view::colchar::Colour;
 pub use objects::{Light, LightType, RaySphere};
 mod ray;
 
