@@ -1,8 +1,8 @@
 use std::sync::mpsc;
 use std::thread;
 
-use gemini_engine::elements::{PixelContainer, Point};
 use gemini_engine::elements::{view::ColChar, Vec2D};
+use gemini_engine::elements::{PixelContainer, Point};
 use gemini_engine::elements3d::{Transform3D, Vec3D};
 mod objects;
 pub use gemini_engine::elements::view::colchar::Colour;
@@ -31,7 +31,7 @@ impl RayScene {
             viewport_size,
             viewport_depth,
             camera_transform,
-            reflection_depth: 5,
+            reflection_depth: 2,
             spheres,
             lights,
         }
@@ -48,47 +48,51 @@ impl RayScene {
     pub fn render(&self, canvas_size: Vec2D) -> PixelContainer {
         let (g_tx, rx) = mpsc::channel();
 
-        const CHUNKS: usize = 500;
-        let chunk_size = canvas_size.x as usize / CHUNKS;
+        const CHUNKS: isize = 20; // 100
+        let chunk_size = canvas_size.x / CHUNKS;
 
-        for x in (0..canvas_size.x).step_by(chunk_size) {
+        for chunk_x in (0..canvas_size.x).step_by(chunk_size as usize) {
             let inner_scene = self.clone();
             let tx = g_tx.clone();
             thread::spawn(move || {
-                let mut row = vec![];
-                for y in 0..canvas_size.y {
-                    let canvas_point = Vec2D::new(x, canvas_size.y - y - 1);
-                    // 2. Determine which square on the viewport corresponds to this pixel
-                    let view_pos = inner_scene
-                        .camera_transform
-                        .rotate(inner_scene.canvas_to_viewport(Vec2D { x, y } - canvas_size / 2, canvas_size));
+                let mut chunk = vec![];
 
-                    // 3. Determine the colour seen through that square
-                    let colour = inner_scene.trace_ray(
-                        inner_scene.camera_transform.translation,
-                        view_pos,
-                        1.0,
-                        f64::INFINITY,
-                        inner_scene.reflection_depth,
-                    );
+                for x in chunk_x..chunk_x + chunk_size {
+                    for y in 0..canvas_size.y {
+                        let canvas_point = Vec2D::new(x, canvas_size.y - y - 1);
+                        // 2. Determine which square on the viewport corresponds to this pixel
+                        let view_pos = inner_scene.camera_transform.rotate(
+                            inner_scene
+                                .canvas_to_viewport(Vec2D { x, y } - canvas_size / 2, canvas_size),
+                        );
 
-                    // 4. Paint the pixel with that clour
-                    let fill_char = ColChar::SOLID.with_colour(colour);
-                    row.push((canvas_point, fill_char));
+                        // 3. Determine the colour seen through that square
+                        let colour = inner_scene.trace_ray(
+                            inner_scene.camera_transform.translation,
+                            view_pos,
+                            1.0,
+                            f64::INFINITY,
+                            inner_scene.reflection_depth,
+                        );
+
+                        // 4. Paint the pixel with that clour
+                        let fill_char = ColChar::SOLID.with_colour(colour);
+                        chunk.push((canvas_point, fill_char));
+                    }
                 }
-                tx.send(row).unwrap();
+                tx.send(chunk).unwrap();
             });
         }
 
         let mut container = PixelContainer::new();
         let mut i = 0;
         for row in rx {
-            container.append(&mut row.into_iter().map(|p| {
-                Point::from(p)
-            }).collect());
+            container.append(&mut row.into_iter().map(|p| Point::from(p)).collect());
 
             i += 1;
-            if i >= canvas_size.x { break; }
+            if i >= CHUNKS {
+                break;
+            }
         }
 
         container
@@ -154,13 +158,7 @@ impl RayScene {
                     };
 
                     // Shadow check
-                    if ray::is_intersection(
-                        &self.spheres,
-                        point,
-                        light_direction,
-                        0.001,
-                        t_max,
-                    ) {
+                    if ray::is_intersection(&self.spheres, point, light_direction, 0.001, t_max) {
                         continue;
                     }
 
