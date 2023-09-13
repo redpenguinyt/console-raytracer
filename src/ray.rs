@@ -23,6 +23,22 @@ pub fn intersect_ray_sphere(origin: Vec3D, direction: Vec3D, sphere: &RaySphere)
     (t1, t2)
 }
 
+pub fn is_intersection(spheres: &[RaySphere], origin: Vec3D, direction: Vec3D, t_min: f64, t_max: f64) -> bool {
+
+    for sphere in spheres {
+        let (t1, t2) = intersect_ray_sphere(origin, direction, sphere);
+
+        if (t_min..t_max).contains(&t1) {
+            return true;
+        }
+        if (t_min..t_max).contains(&t2) {
+            return true;
+        }
+    }
+
+    false
+}
+
 pub fn closest_intersection(
     spheres: &[RaySphere],
     origin: Vec3D,

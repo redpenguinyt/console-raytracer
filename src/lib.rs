@@ -154,14 +154,13 @@ impl RayScene {
                     };
 
                     // Shadow check
-                    let (shadow_sphere, _shadow_t) = ray::closest_intersection(
+                    if ray::is_intersection(
                         &self.spheres,
                         point,
                         light_direction,
                         0.001,
                         t_max,
-                    );
-                    if shadow_sphere.is_some() {
+                    ) {
                         continue;
                     }
 
