@@ -79,7 +79,7 @@ impl RayScene {
 
                         // 4. Paint the pixel with that clour
                         let fill_char = ColChar::SOLID.with_colour(colour);
-                        chunk.push((canvas_point, fill_char));
+                        chunk.push(Point::new(canvas_point, fill_char));
                     }
                 }
                 tx.send(chunk).unwrap();
@@ -88,8 +88,8 @@ impl RayScene {
 
         let mut container = PixelContainer::new();
         let mut i = 0;
-        for row in rx {
-            container.append(&mut row.into_iter().map(|p| Point::from(p)).collect());
+        for mut row in rx {
+            container.append(&mut row);
 
             i += 1;
             if i >= CHUNKS {
@@ -124,7 +124,7 @@ impl RayScene {
         let local_colour = closest_sphere.colour
             * self.compute_lighting(point, normal, -direction, closest_sphere.specular);
 
-        if reflection_depth <= 0 || closest_sphere.reflective <= 0.0 {
+        if reflection_depth == 0 || closest_sphere.reflective <= 0.0 {
             return local_colour;
         }
 
@@ -154,7 +154,7 @@ impl RayScene {
                 LightType::Ambient => i += light.intensity,
                 _ => {
                     let (light_direction, t_max) = match light.light_type {
-                        LightType::Ambient => panic!("Ambience should have already been handled"),
+                        LightType::Ambient => unreachable!(),
                         LightType::Point { position } => (position - point, 1.0),
                         LightType::Directional { direction } => (direction, f64::INFINITY),
                     };
