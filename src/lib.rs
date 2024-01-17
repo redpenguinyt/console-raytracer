@@ -5,7 +5,7 @@ use gemini_engine::elements::{
     view::{ColChar, Colour},
     Vec2D,
 };
-use gemini_engine::elements::{PixelContainer, Point};
+use gemini_engine::elements::{Pixel, PixelContainer};
 use gemini_engine::elements3d::{Transform3D, Vec3D};
 mod objects;
 pub use objects::{Light, LightType, RaySphere};
@@ -79,7 +79,7 @@ impl RayScene {
 
                         // 4. Paint the pixel with that clour
                         let fill_char = ColChar::SOLID.with_colour(colour);
-                        chunk.push(Point::new(canvas_point, fill_char));
+                        chunk.push(Pixel::new(canvas_point, fill_char));
                     }
                 }
                 tx.send(chunk).unwrap();
