@@ -11,7 +11,8 @@ pub struct RaySphere {
 }
 
 impl RaySphere {
-    #[must_use] pub const fn new(
+    #[must_use]
+    pub const fn new(
         centre: Vec3D,
         radius: f64,
         colour: Colour,
@@ -42,21 +43,24 @@ pub struct Light {
 }
 
 impl Light {
-    #[must_use] pub fn new_ambient(intensity: f64) -> Self {
+    #[must_use]
+    pub fn new_ambient(intensity: f64) -> Self {
         Self {
             light_type: LightType::Ambient,
             intensity,
         }
     }
 
-    #[must_use] pub fn new_point(intensity: f64, position: Vec3D) -> Self {
+    #[must_use]
+    pub fn new_point(intensity: f64, position: Vec3D) -> Self {
         Self {
             light_type: LightType::Point { position },
             intensity,
         }
     }
 
-    #[must_use] pub fn new_directional(intensity: f64, direction: Vec3D) -> Self {
+    #[must_use]
+    pub fn new_directional(intensity: f64, direction: Vec3D) -> Self {
         Self {
             light_type: LightType::Directional { direction },
             intensity,

@@ -22,7 +22,8 @@ pub struct RayScene {
 }
 
 impl RayScene {
-    #[must_use] pub const fn new(
+    #[must_use]
+    pub const fn new(
         viewport_size: (f64, f64),
         viewport_depth: f64,
         camera_transform: Transform3D,
@@ -39,7 +40,8 @@ impl RayScene {
         }
     }
 
-    #[must_use] pub fn canvas_to_viewport(&self, pos: Vec2D, canvas_size: Vec2D) -> Vec3D {
+    #[must_use]
+    pub fn canvas_to_viewport(&self, pos: Vec2D, canvas_size: Vec2D) -> Vec3D {
         Vec3D::new(
             pos.x as f64 * self.viewport_size.0 / canvas_size.x as f64,
             pos.y as f64 * self.viewport_size.1 / canvas_size.y as f64,
@@ -47,7 +49,8 @@ impl RayScene {
         )
     }
 
-    #[must_use] pub fn render(&self, canvas_size: Vec2D) -> PixelContainer {
+    #[must_use]
+    pub fn render(&self, canvas_size: Vec2D) -> PixelContainer {
         let (g_tx, rx) = mpsc::channel();
 
         const CHUNKS: isize = 20; // 100
@@ -100,7 +103,8 @@ impl RayScene {
         container
     }
 
-    #[must_use] pub fn trace_ray(
+    #[must_use]
+    pub fn trace_ray(
         &self,
         origin: Vec3D,
         direction: Vec3D,
@@ -140,7 +144,8 @@ impl RayScene {
             + reflected_colour * closest_sphere.reflective
     }
 
-    #[must_use] pub fn compute_lighting(
+    #[must_use]
+    pub fn compute_lighting(
         &self,
         point: Vec3D,
         normal: Vec3D,
