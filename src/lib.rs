@@ -11,6 +11,8 @@ mod objects;
 pub use objects::{Light, LightType, RaySphere};
 mod ray;
 
+const CHUNKS: isize = 20; // 100
+
 #[derive(Debug, Clone)]
 pub struct RayScene {
     pub viewport_size: (f64, f64),
@@ -19,6 +21,7 @@ pub struct RayScene {
     pub reflection_depth: u64,
     pub spheres: Vec<RaySphere>,
     pub lights: Vec<Light>,
+    pub chunks: isize,
 }
 
 impl RayScene {
@@ -37,6 +40,7 @@ impl RayScene {
             reflection_depth: 3,
             spheres,
             lights,
+            chunks: CHUNKS,
         }
     }
 
@@ -56,8 +60,7 @@ impl RayScene {
     pub fn render(&self, canvas_size: Vec2D) -> PixelContainer {
         let (g_tx, rx) = mpsc::channel();
 
-        const CHUNKS: isize = 20; // 100
-        let chunk_size = canvas_size.x / CHUNKS;
+        let chunk_size = canvas_size.x / self.chunks;
 
         for chunk_x in (0..canvas_size.x).step_by(chunk_size as usize) {
             let inner_scene = self.clone();
