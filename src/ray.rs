@@ -11,9 +11,9 @@ pub fn intersect_ray_sphere(origin: Vec3D, direction: Vec3D, sphere: &RaySphere)
 
     let a = direction.dot(direction);
     let b = 2.0 * co.dot(direction);
-    let c = co.dot(co) - r.powi(2);
+    let c = r.mul_add(-r, co.dot(co)); // co dot itself - r^2
 
-    let discriminant = b.powi(2) - (4.0 * a * c);
+    let discriminant = b.mul_add(b, -(4.0 * a * c)); // b^2 - 4ac
     if discriminant < 0.0 {
         return (f64::INFINITY, f64::INFINITY);
     }
