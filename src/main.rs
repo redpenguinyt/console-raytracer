@@ -55,5 +55,5 @@ fn main() {
     canvas.blit(&scene.render(canvas.size()), Wrapping::Panic);
 
     // Display the result
-    canvas.display_render().unwrap();
+    canvas.display_render().expect("Failed to render view");
 }

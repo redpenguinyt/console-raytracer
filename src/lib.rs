@@ -49,6 +49,9 @@ impl RayScene {
         )
     }
 
+    /// Render the scene to a pixel container
+    /// # Panics
+    /// Will panic if any thread fails to send its chunk
     #[must_use]
     pub fn render(&self, canvas_size: Vec2D) -> PixelContainer {
         let (g_tx, rx) = mpsc::channel();
@@ -85,7 +88,7 @@ impl RayScene {
                         chunk.push(Pixel::new(canvas_point, fill_char));
                     }
                 }
-                tx.send(chunk).unwrap();
+                tx.send(chunk).expect("Error sending chunk");
             });
         }
 
@@ -115,9 +118,8 @@ impl RayScene {
         let (closest_sphere, closest_t) =
             ray::closest_intersection(&self.spheres, origin, direction, t_min, t_max);
 
-        let closest_sphere = match closest_sphere {
-            Some(sphere) => sphere,
-            None => return Colour::BLACK,
+        let Some(closest_sphere) = closest_sphere else {
+            return Colour::BLACK;
         };
 
         // Comput colour
@@ -134,7 +136,7 @@ impl RayScene {
 
         let reflected_colour = self.trace_ray(
             point,
-            ray::reflect_ray(-direction, normal),
+            ray::reflect(-direction, normal),
             0.001,
             f64::INFINITY,
             reflection_depth - 1,
@@ -155,40 +157,38 @@ impl RayScene {
         let mut i = 0.0;
 
         for light in &self.lights {
-            match light.light_type {
-                LightType::Ambient => i += light.intensity,
-                _ => {
-                    let (light_direction, t_max) = match light.light_type {
-                        LightType::Ambient => unreachable!(),
-                        LightType::Point { position } => (position - point, 1.0),
-                        LightType::Directional { direction } => (direction, f64::INFINITY),
-                    };
+            if matches!(light.light_type, LightType::Ambient) {
+                i += light.intensity;
+                continue;
+            }
 
-                    // Shadow check
-                    if ray::is_intersection(&self.spheres, point, light_direction, 0.001, t_max) {
-                        continue;
-                    }
+            let (light_direction, t_max) = match light.light_type {
+                LightType::Ambient => unreachable!(),
+                LightType::Point { position } => (position - point, 1.0),
+                LightType::Directional { direction } => (direction, f64::INFINITY),
+            };
 
-                    // Diffuse
-                    let n_dot_l = normal.dot(light_direction);
-                    if n_dot_l > 0.0 {
-                        i += light.intensity * n_dot_l
-                            / (normal.magnitude() * light_direction.magnitude());
-                    }
+            // Shadow check
+            if ray::is_intersection(&self.spheres, point, light_direction, 0.001, t_max) {
+                continue;
+            }
 
-                    // Specular
-                    if specular != -1.0 {
-                        let reflected_ray = ray::reflect_ray(light_direction, normal);
+            // Diffuse
+            let n_dot_l = normal.dot(light_direction);
+            if n_dot_l > 0.0 {
+                i += light.intensity * n_dot_l / (normal.magnitude() * light_direction.magnitude());
+            }
 
-                        let r_dot_v = reflected_ray.dot(towards_view);
+            // Specular
+            if (specular - -1.0).abs() < f64::EPSILON {
+                let reflected_ray = ray::reflect(light_direction, normal);
 
-                        if r_dot_v > 0.0 {
-                            i += light.intensity
-                                * (r_dot_v
-                                    / (reflected_ray.magnitude() * towards_view.magnitude()))
-                                .powf(specular);
-                        }
-                    }
+                let r_dot_v = reflected_ray.dot(towards_view);
+
+                if r_dot_v > 0.0 {
+                    i += light.intensity
+                        * (r_dot_v / (reflected_ray.magnitude() * towards_view.magnitude()))
+                            .powf(specular);
                 }
             }
         }

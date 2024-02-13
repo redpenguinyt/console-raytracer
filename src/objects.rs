@@ -44,7 +44,7 @@ pub struct Light {
 
 impl Light {
     #[must_use]
-    pub fn new_ambient(intensity: f64) -> Self {
+    pub const fn new_ambient(intensity: f64) -> Self {
         Self {
             light_type: LightType::Ambient,
             intensity,
@@ -52,7 +52,7 @@ impl Light {
     }
 
     #[must_use]
-    pub fn new_point(intensity: f64, position: Vec3D) -> Self {
+    pub const fn new_point(intensity: f64, position: Vec3D) -> Self {
         Self {
             light_type: LightType::Point { position },
             intensity,
@@ -60,7 +60,7 @@ impl Light {
     }
 
     #[must_use]
-    pub fn new_directional(intensity: f64, direction: Vec3D) -> Self {
+    pub const fn new_directional(intensity: f64, direction: Vec3D) -> Self {
         Self {
             light_type: LightType::Directional { direction },
             intensity,

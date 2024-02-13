@@ -1,7 +1,7 @@
 use super::objects::RaySphere;
 use gemini_engine::elements3d::Vec3D;
 
-pub fn reflect_ray(ray: Vec3D, normal: Vec3D) -> Vec3D {
+pub fn reflect(ray: Vec3D, normal: Vec3D) -> Vec3D {
     normal * 2.0 * normal.dot(ray) - ray
 }
 
